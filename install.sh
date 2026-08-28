@@ -510,9 +510,17 @@ ensure_runtime_dirs() {
 }
 
 write_realm_config() {
-  local listen_port remote
+  local listen_port remote listen_addr
 
   ensure_runtime_dirs
+
+  # [::] is dual-stack in realm (IPV6_V6ONLY is kept off), so it accepts IPv4 too.
+  # Fall back to 0.0.0.0 only when the host has no IPv6 support at all.
+  if [ -f /proc/net/if_inet6 ]; then
+    listen_addr="[::]"
+  else
+    listen_addr="0.0.0.0"
+  fi
 
   cat > "$REALM_CONFIG" <<EOF
 [log]
@@ -539,7 +547,7 @@ EOF
     cat >> "$REALM_CONFIG" <<EOF
 
 [[endpoints]]
-listen = "0.0.0.0:${listen_port}"
+listen = "${listen_addr}:${listen_port}"
 remote = "${remote}"
 EOF
   done < "$REALM_ENDPOINTS"
