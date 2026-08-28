@@ -1,8 +1,7 @@
-# EasyRealm
+# ERealm
 
-EasyRealm is an interactive Bash script for installing and managing `realm` port forwarding on Linux servers.
+ERealm is an interactive Bash script for installing and managing `realm` port forwarding on Linux servers.
 
-It focuses on a simple menu-driven workflow so you can deploy Realm, add or delete forwarding rules, and manage the service without editing configuration files by hand.
 
 ## Features
 
@@ -15,7 +14,7 @@ It focuses on a simple menu-driven workflow so you can deploy Realm, add or dele
 ## Usage
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/DarkJimiHole/easyrealm/main/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/flyto23/Erealm/main/install.sh)
 ```
 
 ## Menu
