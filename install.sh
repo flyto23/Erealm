@@ -850,7 +850,7 @@ print_header() {
   local width=58
   local divider left_text right_label right_value padding
   divider=$(printf '%*s' "$width" '' | tr ' ' '-')
-  left_text="realm script ${SCRIPT_VERSION}"
+  left_text="  Erealm ${SCRIPT_VERSION}"
   right_label="Command: "
   right_value="${REALM_SHORTCUT_NAME}"
   padding=$(( width - ${#left_text} - ${#right_label} - ${#right_value} ))
@@ -859,18 +859,9 @@ print_header() {
   fi
 
   echo ""
-  echo "$(color "$C_CYAN" "  ______                _____            _")"
-  echo "$(color "$C_CYAN" " |  ____|              |  __ \\          | |")"
-  echo "$(color "$C_CYAN" " | |__   __ _ ___ _   _| |__) |___  __ _| |_ __ ___")"
-  echo "$(color "$C_CYAN" " |  __| / _  / __| | | |  _  // _ \\/ _  | |  /  _ \\")"
-  echo "$(color "$C_CYAN" " | |___| (_| \\__ \\ |_| | | \\ \\  __/ (_| | | | | | | |")"
-  echo "$(color "$C_CYAN" " |______\\__,_|___/\\__, |_|  \\_\\___|\\__,_|_|_| |_| |_|")"
-  echo "$(color "$C_CYAN" "                   __/ |")"
-  echo "$(color "$C_CYAN" "                  |___/")"
-  echo ""
   echo "$(color "$C_BLUE" "$divider")"
   printf "%b%s%b%*s%b%s%b%b%s%b\n" \
-    "$C_BLUE" "$left_text" "$C_RESET" \
+    "$C_CYAN$C_BOLD" "$left_text" "$C_RESET" \
     "$padding" "" \
     "$C_BLUE" "$right_label" "$C_RESET" \
     "$C_RED" "$right_value" "$C_RESET"
