@@ -2,7 +2,6 @@
 set -euo pipefail
 
 REALM_VERSION="v2.7.0"
-SCRIPT_RAW_URL="https://raw.githubusercontent.com/DarkJimiHole/easyrealm/main/install.sh"
 REALM_SERVICE_NAME="realm"
 REALM_BIN="/usr/local/bin/realm"
 REALM_SHORTCUT_NAME="realm"
@@ -13,7 +12,7 @@ REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.0"
+SCRIPT_VERSION="v1.1"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -91,7 +90,7 @@ require_root() {
 }
 
 self_install() {
-  local self tmp_file
+  local self
   self=$(readlink -f "$0" 2>/dev/null || echo "$0")
 
   if [ "$self" = "$REALM_SCRIPT_CMD" ]; then
@@ -104,21 +103,9 @@ self_install() {
     return 0
   fi
 
-  if ! ensure_fetch_cmd >/dev/null 2>&1; then
-    echo_warn "Command wrapper installation was skipped because the script source could not be read or downloaded."
-    return 0
-  fi
-
-  tmp_file=$(mktemp)
-  if download_file "$SCRIPT_RAW_URL" "$tmp_file"; then
-    install -d -m 0755 "$(dirname "$REALM_SCRIPT_CMD")"
-    install -m 0755 "$tmp_file" "$REALM_SCRIPT_CMD"
-    rm -f "$tmp_file"
-    return 0
-  fi
-
-  rm -f "$tmp_file"
-  echo_warn "Command wrapper installation was skipped because the script source could not be downloaded."
+  # Never fall back to downloading a remote copy: it would silently overwrite
+  # local modifications to this script (e.g. the [::] dual-stack listen fix).
+  echo_warn "Command wrapper installation was skipped because the script source could not be read."
 }
 
 detect_pkg_mgr() {
