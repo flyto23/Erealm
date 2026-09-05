@@ -12,7 +12,7 @@ REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.7"
+SCRIPT_VERSION="v1.8"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -879,23 +879,13 @@ print_menu() {
 
 print_header() {
   local width=58
-  local divider left_text right_label right_value padding
+  local divider left_text
   divider=$(printf '%*s' "$width" '' | tr ' ' '-')
   left_text="  Realm ${SCRIPT_VERSION}"
-  right_label="Command: "
-  right_value="${REALM_SHORTCUT_NAME}"
-  padding=$(( width - ${#left_text} - ${#right_label} - ${#right_value} ))
-  if [ "$padding" -lt 1 ]; then
-    padding=1
-  fi
 
   echo ""
   echo "$(color "$C_BLUE" "$divider")"
-  printf "%b%s%b%*s%b%s%b%b%s%b\n" \
-    "$C_CYAN$C_BOLD" "$left_text" "$C_RESET" \
-    "$padding" "" \
-    "$C_BLUE" "$right_label" "$C_RESET" \
-    "$C_RED" "$right_value" "$C_RESET"
+  printf "%b%s%b\n" "$C_CYAN$C_BOLD" "$left_text" "$C_RESET"
   echo "$(color "$C_BLUE" "$divider")"
 }
 
