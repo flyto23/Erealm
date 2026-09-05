@@ -1,50 +1,56 @@
 ```
-# Environment
+# Environment variables
 .env
 .env.local
-.env.*
+*.env.*
 
-# Logs and temp files
+# Logs
 *.log
+
+# Temporary files
 *.tmp
 *.swp
+*.swo
 
-# Editors
-.vscode/
-.idea/
-
-# Dependencies
-node_modules/
-.venv/
-venv/
+# Python
 __pycache__/
-.mypy_cache/
-.pytest_cache/
-
-# Build artifacts
-dist/
-build/
-target/
 *.pyc
-*.class
-*.o
-*.exe
-*.dll
-*.so
-*.a
-*.obj
-*.out
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Coverage
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.venv.bak/
+pip-log.txt
+pip-selfcheck.json
+.pytest_cache/
+.mypy_cache/
+.coverage
 coverage/
 htmlcov/
-.coverage
 
-# Compressed files
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Compression
 *.zip
 *.gz
 *.tar
@@ -63,4 +69,8 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
