@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes. The modified files (`Erealm_install.sh` and `install.sh`) are shell script files that appear to be part of the source code and should not be ignored.
+Nothing should be ignored based on the provided file changes. The modified files (`Erealm_install.sh` and `install.sh`) are shell script files that should be tracked in version control.
