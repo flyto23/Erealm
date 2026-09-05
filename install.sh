@@ -12,7 +12,7 @@ REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.2"
+SCRIPT_VERSION="v1.4"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -829,31 +829,58 @@ delete_forward() {
 }
 
 delete_script() {
+  # Uninstall realm first if it is still installed
   if realm_is_installed; then
-    echo_warn "Realm is still installed. Uninstall Realm before removing the management script."
-    return 1
+    echo_info "Uninstalling Realm before removing the script..."
+    uninstall_realm
   fi
 
+  # Remove the management script itself
   if [ -f "$REALM_SCRIPT_CMD" ]; then
     rm -f "$REALM_SCRIPT_CMD"
     echo_ok "Management script removed: ${REALM_SCRIPT_CMD}"
   else
     echo_warn "The management script was not found: ${REALM_SCRIPT_CMD}"
   fi
+
+  # Clean up any remaining configuration and log directories
+  if [ -d "$REALM_DIR" ]; then
+    rm -rf "$REALM_DIR"
+    echo_ok "Configuration directory removed: ${REALM_DIR}"
+  fi
+
+  if [ -d "$REALM_LOG_DIR" ]; then
+    rm -rf "$REALM_LOG_DIR"
+    echo_ok "Log directory removed: ${REALM_LOG_DIR}"
+  fi
+
+  # Remove systemd unit file if it still exists
+  if [ -f "$REALM_UNIT" ]; then
+    rm -f "$REALM_UNIT"
+    echo_ok "Systemd unit file removed: ${REALM_UNIT}"
+    reload_systemd
+  fi
+
+  # Remove the realm binary if it still exists
+  if [ -f "$REALM_BIN" ]; then
+    rm -f "$REALM_BIN"
+    echo_ok "Realm binary removed: ${REALM_BIN}"
+  fi
+
+  echo_ok "Complete uninstallation finished. Realm and all script files have been removed."
 }
 
 print_menu() {
   echo ""
   if ! realm_is_installed; then
     echo "$(color "$C_CYAN" "1.") Install Realm"
-    echo "$(color "$C_CYAN" "2.") Uninstall Script"
+    echo "$(color "$C_CYAN" "0.") Exit"
   else
     echo "$(color "$C_CYAN" "1.") Add Forwarding Rule"
     echo "$(color "$C_CYAN" "2.") Remove Forwarding Rule"
-    echo "$(color "$C_CYAN" "3.") Uninstall Realm"
-    echo "$(color "$C_CYAN" "4.") Uninstall Script"
+    echo "$(color "$C_CYAN" "3.") Uninstall All"
+    echo "$(color "$C_CYAN" "0.") Exit"
   fi
-  echo "$(color "$C_CYAN" "0.") Exit"
 }
 
 print_header() {
@@ -915,25 +942,18 @@ main() {
         fi
         ;;
       2)
-        if ! realm_is_installed; then
-          run_menu_action delete_script
-        else
+        if realm_is_installed; then
           run_menu_action delete_forward
+        else
+          echo_err "Invalid menu option."
+          pause_for_menu
         fi
         ;;
       3)
         if realm_is_installed; then
-          run_menu_action uninstall_realm
-        else
-          echo_err "Realm is not installed."
-          pause_for_menu
-        fi
-        ;;
-      4)
-        if realm_is_installed; then
           run_menu_action delete_script
         else
-          echo_err "Realm is not installed."
+          echo_err "Invalid menu option."
           pause_for_menu
         fi
         ;;
