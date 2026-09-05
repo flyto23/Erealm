@@ -840,10 +840,12 @@ print_menu() {
   echo ""
   if ! realm_is_installed; then
     echo "$(color "$C_CYAN" "1.") Install Realm"
+    echo "$(color "$C_CYAN" "2.") Uninstall Script"
   else
     echo "$(color "$C_CYAN" "1.") Add Forwarding Rule"
     echo "$(color "$C_CYAN" "2.") Remove Forwarding Rule"
     echo "$(color "$C_CYAN" "3.") Uninstall Realm"
+    echo "$(color "$C_CYAN" "4.") Uninstall Script"
   fi
   echo "$(color "$C_CYAN" "0.") Exit"
 }
@@ -904,16 +906,23 @@ main() {
         fi
         ;;
       2)
-        if realm_is_installed; then
-          run_menu_action delete_forward
+        if ! realm_is_installed; then
+          run_menu_action delete_script
         else
-          echo_err "Realm is not installed."
-          pause_for_menu
+          run_menu_action delete_forward
         fi
         ;;
       3)
         if realm_is_installed; then
           run_menu_action uninstall_realm
+        else
+          echo_err "Realm is not installed."
+          pause_for_menu
+        fi
+        ;;
+      4)
+        if realm_is_installed; then
+          run_menu_action delete_script
         else
           echo_err "Realm is not installed."
           pause_for_menu
