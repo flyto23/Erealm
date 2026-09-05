@@ -897,7 +897,10 @@ main() {
     read -r -p "Select an option [0]: " choice
 
     case "$choice" in
-      0) exit 0 ;;
+      0|"")
+        echo "Exiting..."
+        exit 0
+        ;;
       1)
         if ! realm_is_installed; then
           run_menu_action install_realm
@@ -928,7 +931,10 @@ main() {
           pause_for_menu
         fi
         ;;
-      *) echo_err "Invalid menu option." ;;
+      *)
+        echo_err "Invalid menu option."
+        pause_for_menu
+        ;;
     esac
   done
 }
