@@ -97,6 +97,12 @@ self_install() {
     return 0
   fi
 
+  # Handle piped scripts (e.g., bash <(curl ...))
+  if [[ "$0" == *process* ]] || [[ "$0" == /dev/fd/* ]]; then
+    echo_warn "Running from pipe. Use 'bash /path/to/install.sh' for full wrapper installation."
+    return 0
+  fi
+
   if [ -f "$self" ] && [ -r "$self" ]; then
     install -d -m 0755 "$(dirname "$REALM_SCRIPT_CMD")"
     install -m 0755 "$self" "$REALM_SCRIPT_CMD"
