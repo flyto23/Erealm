@@ -1,5 +1,33 @@
-*.pyc
+```
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+.venv/
+venv/
 __pycache__/
+.mypy_cache/
+.pytest_cache/
+dist/
+build/
+target/
+.gradle/
+
+# Compiled files
+*.pyc
+*.class
 *.o
 *.obj
 *.exe
@@ -7,26 +35,10 @@ __pycache__/
 *.so
 *.a
 *.out
-node_modules/
-venv/
-.venv/
-.mypy_cache/
-.pytest_cache/
-dist/
-build/
-target/
-.gradle/
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
+
+# System files
 .DS_Store
 Thumbs.db
-.env
-.env.local
-*.env.*
-*.log
 coverage/
 htmlcov/
 *.zip
@@ -47,7 +59,4 @@ htmlcov/
 *.Z
 *.lz
 *.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+```
