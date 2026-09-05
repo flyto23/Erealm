@@ -838,11 +838,6 @@ delete_script() {
 
 print_menu() {
   echo ""
-  echo "$(color "$C_CYAN" "1.") Install Realm"
-  echo "$(color "$C_CYAN" "2.") Uninstall Realm"
-  echo "$(color "$C_CYAN" "3.") Add Forwarding Rule"
-  echo "$(color "$C_CYAN" "4.") Delete Forwarding Rule"
-  echo "$(color "$C_CYAN" "5.") Uninstall Script"
   echo "$(color "$C_CYAN" "0.") Exit"
 }
 
@@ -890,19 +885,9 @@ main() {
     echo ""
     printf "[%s]\n" "$(color "$C_GREEN" "Main Menu")"
     print_menu
-    read -r -p "Select an option [0-5]: " choice
+    read -r -p "Select an option [0]: " choice
 
     case "$choice" in
-      1) run_menu_action install_realm ;;
-      2) run_menu_action uninstall_realm ;;
-      3) run_menu_action add_forward ;;
-      4) run_menu_action delete_forward ;;
-      5)
-        if delete_script; then
-          exit 0
-        fi
-        pause_for_menu
-        ;;
       0) exit 0 ;;
       *) echo_err "Invalid menu option." ;;
     esac
