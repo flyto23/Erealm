@@ -823,13 +823,7 @@ delete_forward() {
 }
 
 delete_script() {
-  # Uninstall realm first if it is still installed
-  if realm_is_installed; then
-    echo_info "Uninstalling Realm before removing the script..."
-    uninstall_realm
-  fi
-
-  # Remove the management script itself
+  # Remove the management script itself first
   if [ -f "$REALM_SCRIPT_CMD" ]; then
     rm -f "$REALM_SCRIPT_CMD"
     echo_ok "Management script removed: ${REALM_SCRIPT_CMD}"
@@ -837,7 +831,17 @@ delete_script() {
     echo_warn "The management script was not found: ${REALM_SCRIPT_CMD}"
   fi
 
-  # Clean up any remaining configuration and log directories
+  # Uninstall realm completely if it is still installed
+  if realm_is_installed; then
+    echo_info "Uninstalling Realm..."
+    stop_realm_service
+    rm -f "$REALM_UNIT"
+    rm -f "$REALM_BIN"
+    reload_systemd
+    echo_ok "Realm service removed."
+  fi
+
+  # Clean up configuration and log directories
   if [ -d "$REALM_DIR" ]; then
     rm -rf "$REALM_DIR"
     echo_ok "Configuration directory removed: ${REALM_DIR}"
@@ -848,20 +852,10 @@ delete_script() {
     echo_ok "Log directory removed: ${REALM_LOG_DIR}"
   fi
 
-  # Remove systemd unit file if it still exists
-  if [ -f "$REALM_UNIT" ]; then
-    rm -f "$REALM_UNIT"
-    echo_ok "Systemd unit file removed: ${REALM_UNIT}"
-    reload_systemd
-  fi
-
-  # Remove the realm binary if it still exists
-  if [ -f "$REALM_BIN" ]; then
-    rm -f "$REALM_BIN"
-    echo_ok "Realm binary removed: ${REALM_BIN}"
-  fi
-
-  echo_ok "Complete uninstallation finished. Realm and all script files have been removed."
+  echo_ok "Complete uninstallation finished. All files have been removed."
+  
+  # Exit immediately without returning to menu
+  exit 0
 }
 
 print_menu() {
