@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes. The only modified file is `install.sh`, which is a shell script and should not be ignored.
+Nothing needs to be added to the .gitignore file based on the provided changes. The files 'Erealm_install.sh' and 'install.sh' are shell script files that should typically be tracked in version control.
