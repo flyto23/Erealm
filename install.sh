@@ -6,13 +6,14 @@ REALM_SERVICE_NAME="realm"
 REALM_BIN="/usr/local/bin/realm"
 REALM_SHORTCUT_NAME="realm"
 REALM_SCRIPT_CMD="/usr/local/sbin/${REALM_SHORTCUT_NAME}"
+EREALM_SCRIPT_CMD="/usr/local/sbin/erealm"
 REALM_DIR="/etc/realm"
 REALM_CONFIG="${REALM_DIR}/config.toml"
 REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.4"
+SCRIPT_VERSION="v1.6"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -93,7 +94,7 @@ self_install() {
   local self
   self=$(readlink -f "$0" 2>/dev/null || echo "$0")
 
-  if [ "$self" = "$REALM_SCRIPT_CMD" ]; then
+  if [ "$self" = "$REALM_SCRIPT_CMD" ] || [ "$self" = "$EREALM_SCRIPT_CMD" ]; then
     return 0
   fi
 
@@ -106,6 +107,7 @@ self_install() {
   if [ -f "$self" ] && [ -r "$self" ]; then
     install -d -m 0755 "$(dirname "$REALM_SCRIPT_CMD")"
     install -m 0755 "$self" "$REALM_SCRIPT_CMD"
+    ln -sf "$REALM_SCRIPT_CMD" "$EREALM_SCRIPT_CMD"
     return 0
   fi
 
@@ -757,6 +759,12 @@ uninstall_realm() {
   rm -rf "$REALM_LOG_DIR"
   reload_systemd
 
+  # Remove the erealm command link as well
+  if [ -L "$EREALM_SCRIPT_CMD" ] || [ -f "$EREALM_SCRIPT_CMD" ]; then
+    rm -f "$EREALM_SCRIPT_CMD"
+    echo_ok "Erealm command removed: ${EREALM_SCRIPT_CMD}"
+  fi
+
   echo_ok "Realm was removed successfully."
 }
 
@@ -835,6 +843,12 @@ delete_script() {
     echo_ok "Management script removed: ${REALM_SCRIPT_CMD}"
   else
     echo_warn "The management script was not found: ${REALM_SCRIPT_CMD}"
+  fi
+
+  # Remove the erealm command link as well
+  if [ -L "$EREALM_SCRIPT_CMD" ] || [ -f "$EREALM_SCRIPT_CMD" ]; then
+    rm -f "$EREALM_SCRIPT_CMD"
+    echo_ok "Erealm command removed: ${EREALM_SCRIPT_CMD}"
   fi
 
   # Uninstall realm completely if it is still installed
