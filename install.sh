@@ -3,7 +3,10 @@ set -euo pipefail
 
 REALM_VERSION="v2.7.0"
 REALM_SERVICE_NAME="realm"
-REALM_BIN="/usr/local/bin/realm"
+# The realm daemon binary lives OUTSIDE PATH so the "realm" command resolves
+# only to the management menu (REALM_SHORTCUT_NAME), never to the binary.
+REALM_BIN="/usr/local/libexec/realm/realm"
+REALM_BIN_LEGACY="/usr/local/bin/realm"
 REALM_SHORTCUT_NAME="realm"
 REALM_SCRIPT_CMD="/usr/local/sbin/${REALM_SHORTCUT_NAME}"
 REALM_DIR="/etc/realm"
@@ -12,7 +15,7 @@ REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.8"
+SCRIPT_VERSION="v1.9"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -265,7 +268,7 @@ realm_download_url() {
 }
 
 realm_is_installed() {
-  [ -x "$REALM_BIN" ] || [ -f "$REALM_UNIT" ] || [ -d "$REALM_DIR" ]
+  [ -x "$REALM_BIN" ] || [ -x "$REALM_BIN_LEGACY" ] || [ -f "$REALM_UNIT" ] || [ -d "$REALM_DIR" ]
 }
 
 realm_has_forwards() {
@@ -726,6 +729,14 @@ install_realm() {
 
   install -d -m 0755 "$(dirname "$REALM_BIN")"
   install -m 0755 "$realm_file" "$REALM_BIN"
+
+  # Remove a legacy binary at the old PATH location so "realm" resolves
+  # exclusively to the management menu shortcut.
+  if [ -e "$REALM_BIN_LEGACY" ]; then
+    rm -f "$REALM_BIN_LEGACY"
+    echo_info "Removed legacy binary: ${REALM_BIN_LEGACY}"
+  fi
+
   ensure_runtime_dirs
   : > "$REALM_ENDPOINTS"
   write_realm_config
@@ -753,6 +764,7 @@ uninstall_realm() {
   stop_realm_service
   rm -f "$REALM_UNIT"
   rm -f "$REALM_BIN"
+  rm -f "$REALM_BIN_LEGACY"
   rm -rf "$REALM_DIR"
   rm -rf "$REALM_LOG_DIR"
   reload_systemd
@@ -843,6 +855,7 @@ delete_script() {
     stop_realm_service
     rm -f "$REALM_UNIT"
     rm -f "$REALM_BIN"
+    rm -f "$REALM_BIN_LEGACY"
     reload_systemd
     echo_ok "Realm service removed."
   fi
