@@ -6,16 +6,19 @@ REALM_SERVICE_NAME="realm"
 # The realm daemon binary lives OUTSIDE PATH so the "realm" command resolves
 # only to the management menu (REALM_SHORTCUT_NAME), never to the binary.
 REALM_BIN="/usr/local/libexec/realm/realm"
-REALM_BIN_LEGACY="/usr/local/bin/realm"
 REALM_SHORTCUT_NAME="realm"
-REALM_SCRIPT_CMD="/usr/local/sbin/${REALM_SHORTCUT_NAME}"
+# The management shortcut lives in /usr/local/bin, which is always on PATH,
+# so typing "realm" reliably opens the interactive main menu.
+REALM_SCRIPT_CMD="/usr/local/bin/${REALM_SHORTCUT_NAME}"
+# Stale command location from older releases, cleaned up so "realm" stays unique.
+REALM_SCRIPT_LEGACY="/usr/local/sbin/${REALM_SHORTCUT_NAME}"
 REALM_DIR="/etc/realm"
 REALM_CONFIG="${REALM_DIR}/config.toml"
 REALM_ENDPOINTS="${REALM_DIR}/forwards.list"
 REALM_LOG_DIR="/var/log/realm"
 REALM_LOG_FILE="${REALM_LOG_DIR}/realm.log"
 REALM_UNIT="/etc/systemd/system/${REALM_SERVICE_NAME}.service"
-SCRIPT_VERSION="v1.9"
+SCRIPT_VERSION="v2.0"
 
 if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
   C_RESET="\033[0m"
@@ -109,6 +112,12 @@ self_install() {
   if [ -f "$self" ] && [ -r "$self" ]; then
     install -d -m 0755 "$(dirname "$REALM_SCRIPT_CMD")"
     install -m 0755 "$self" "$REALM_SCRIPT_CMD"
+
+    # Drop any stale "realm" command left by an older release so the one in
+    # /usr/local/bin is the only shortcut and resolves to the main menu.
+    if [ -f "$REALM_SCRIPT_LEGACY" ]; then
+      rm -f "$REALM_SCRIPT_LEGACY"
+    fi
     return 0
   fi
 
@@ -268,7 +277,7 @@ realm_download_url() {
 }
 
 realm_is_installed() {
-  [ -x "$REALM_BIN" ] || [ -x "$REALM_BIN_LEGACY" ] || [ -f "$REALM_UNIT" ] || [ -d "$REALM_DIR" ]
+  [ -x "$REALM_BIN" ] || [ -f "$REALM_UNIT" ] || [ -d "$REALM_DIR" ]
 }
 
 realm_has_forwards() {
@@ -730,12 +739,9 @@ install_realm() {
   install -d -m 0755 "$(dirname "$REALM_BIN")"
   install -m 0755 "$realm_file" "$REALM_BIN"
 
-  # Remove a legacy binary at the old PATH location so "realm" resolves
-  # exclusively to the management menu shortcut.
-  if [ -e "$REALM_BIN_LEGACY" ]; then
-    rm -f "$REALM_BIN_LEGACY"
-    echo_info "Removed legacy binary: ${REALM_BIN_LEGACY}"
-  fi
+  # self_install() has already put the menu shortcut at /usr/local/bin/realm,
+  # overwriting any old daemon binary that may have been there, so nothing more
+  # needs cleaning here — "realm" now resolves only to the main menu.
 
   ensure_runtime_dirs
   : > "$REALM_ENDPOINTS"
@@ -764,7 +770,6 @@ uninstall_realm() {
   stop_realm_service
   rm -f "$REALM_UNIT"
   rm -f "$REALM_BIN"
-  rm -f "$REALM_BIN_LEGACY"
   rm -rf "$REALM_DIR"
   rm -rf "$REALM_LOG_DIR"
   reload_systemd
@@ -849,13 +854,18 @@ delete_script() {
     echo_warn "The management script was not found: ${REALM_SCRIPT_CMD}"
   fi
 
+  # Remove any stale copy of the command from an older release.
+  if [ -f "$REALM_SCRIPT_LEGACY" ]; then
+    rm -f "$REALM_SCRIPT_LEGACY"
+    echo_ok "Removed stale command: ${REALM_SCRIPT_LEGACY}"
+  fi
+
   # Uninstall realm completely if it is still installed
   if realm_is_installed; then
     echo_info "Uninstalling Realm..."
     stop_realm_service
     rm -f "$REALM_UNIT"
     rm -f "$REALM_BIN"
-    rm -f "$REALM_BIN_LEGACY"
     reload_systemd
     echo_ok "Realm service removed."
   fi
