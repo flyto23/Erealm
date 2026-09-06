@@ -14,7 +14,7 @@ ERealm is an interactive Bash script for installing and managing `realm` port fo
 ## Usage
 
 ```bash
-bash <(curl -Ls https://raw.githubusercontent.com/flyto23/Erealm/main/install.sh)
+curl -fL -o /tmp/install.sh https://raw.githubusercontent.com/flyto23/Erealm/main/install.sh && sudo bash /tmp/install.sh
 ```
 
 ## Menu
